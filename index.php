@@ -16,22 +16,26 @@ include_once BASE_PATH . "/controllers/Usuarios.php";
 include_once BASE_PATH . "/controllers/Productos.php";
 
 define("BASE_URL", Comun::env("BASE_URL"));
+define("PORC_IVA", Comun::env("PORC_IVA"));
 # Las páginas a las que solamente se puede acceder si la sesión está iniciada
 $PAGINAS_SESION_REQUERIDA = [
     # Clientes
     "clientes", "nuevo_cliente", "guardar_cliente",
     "editar_cliente", "actualizar_cliente", "eliminar_cliente",
     #Productos
-    "productos", "nuevo_producto", "guardar_producto",
+    "productos", "nuevo_producto", "guardar_producto", "editar_producto",
+    "actualizar_producto", "eliminar_producto",
     # Cotizaciones
     "cotizaciones", "nueva_cotizacion", "guardar_cotizacion",
     "eliminar_cotizacion", "editar_cotizacion", "actualizar_cotizacion",
     #Detalles y características de cotizaciones
     "detalles_caracteristicas_cotizacion",
     #Servicios de cotizaciones
-    "agregar_servicio_a_cotizacion",
-    "editar_servicio_de_cotizacion", "eliminar_servicio_de_cotizacion",
-    "actualizar_servicio_de_cotizacion",
+    "agregar_servicio_a_cotizacion", "editar_servicio_de_cotizacion", 
+    "eliminar_servicio_de_cotizacion", "actualizar_servicio_de_cotizacion", 
+    #Productos de cotizaciones
+    "agregar_producto_a_cotizacion", "editar_producto_de_cotizacion",
+    "eliminar_producto_de_cotizacion", "actualizar_producto_de_cotizacion",
     # Características de cotizaciones
     "agregar_caracteristica_a_cotizacion", "editar_caracteristica_de_cotizacion",
     "eliminar_caracteristica_de_cotizacion", "actualizar_caracteristica_de_cotizacion",

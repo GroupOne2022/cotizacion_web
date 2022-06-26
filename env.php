@@ -16,7 +16,7 @@
 
 ; URL base del proyecto, algo como https://sitio.com
 BASE_URL = "http://localhost/cotizacion_web"
-
+PORC_IVA = 12
 
 USUARIO_MYSQL = "root"
 PASS_MYSQL = "12345"

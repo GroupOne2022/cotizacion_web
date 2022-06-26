@@ -1,6 +1,6 @@
 <?php
 if (
-    empty($_POST["image"])
+    empty($_POST["calculaIva"])
     ||
     empty($_POST["valor"])
     ||
@@ -11,15 +11,7 @@ if (
     exit;
 }
 
-$check = getimagesize($_FILES["image"]["tmp_name"]);
-if($check !== false){
-    $image = $_FILES['image']['tmp_name'];
-    $imgContent = addslashes(file_get_contents($image));
-}else{
-    echo "Please select an image file to upload.";
-    exit;
-}
 
 Utiles::salirSiTokenCSRFNoCoincide($_POST["tokenCSRF"]);
-Productos::nuevo($_POST["descripcion"], $_POST["valor"], $_POST["imgContent"]);
+Productos::nuevo($_POST["descripcion"], $_POST["valor"], $_POST["calculaIva"]);
 Utiles::redireccionar("productos");

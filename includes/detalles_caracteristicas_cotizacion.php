@@ -8,18 +8,20 @@ if (!$cotizacion) {
     exit("No existe la cotización");
 }
 
-$servicios = Cotizaciones::serviciosPorId($_GET["id"]);
+$productos = Productos::todos();
+$detalleProductos = Cotizaciones::productosPorId($_GET["id"]);
 $caracteristicas = Cotizaciones::caracteristicasPorId($_GET["id"]);
 $tokenCSRF = Utiles::obtenerTokenCSRF();
+$porc = PORC_IVA;
 ?>
 <div id="app">
     <div class="row">
         <div class="col-sm">
             <div class="row">
                 <div class="col-sm-8">
-                    <h3>Servicios</h3>
+                    <h3>Productos</h3>
                     <div class="alert alert-info">
-                        <p>Añada servicios que tienen un costo y precio, al final se calcularán los totales</p>
+                        <p>Añada Productos que tienen un costo y precio, al final se calcularán los totales</p>
                     </div>
                     <div class="row">
                         <div class="col-sm">
@@ -27,9 +29,10 @@ $tokenCSRF = Utiles::obtenerTokenCSRF();
                                 <table class="table table-striped">
                                     <thead>
                                     <tr>
-                                        <th>Servicio</th>
-                                        <th>Costo</th>
-                                        <th>Tiempo</th>
+                                        <th>Producto</th>
+                                        <th>Precio Unitario</th>
+                                        <th>Cantidad</th>
+                                        <th>Total</th>
                                         <th>Editar</th>
                                         <th>Eliminar</th>
                                     </tr>
@@ -38,32 +41,44 @@ $tokenCSRF = Utiles::obtenerTokenCSRF();
                                     <?php
                                     $costoTotal = 0;
                                     $tiempoTotal = 0;
+                                    $baseImponibleIva = 0;
+                                    $baseImponibleSinIva = 0;
                                     ?>
                                     <?php
-                                    foreach ($servicios as $servicio) {
-                                        $costoTotal += $servicio->costo;
-                                        $tiempoTotal += $servicio->tiempoEnMinutos * $servicio->multiplicador;
+                                    foreach ($detalleProductos as $detalleProd) {
+                                        $costoTotal += $detalleProd->costo_total;
+                                        if ($detalleProd->calculaIva=="SI") {
+                                            $baseImponibleIva += $detalleProd->costo_total;
+                                        }
+                                        else {
+                                            $baseImponibleSinIva += $detalleProd->costo_total;
+                                        }
+                                        /*$cantidadTotal += $detalleProd->cantidad;*/
                                         ?>
                                         <tr>
-                                            <td><?php echo htmlentities($servicio->servicio) ?></td>
-                                            <td class="text-nowrap">{{<?php echo htmlentities($servicio->costo) ?> |
+                                            <td><?php echo htmlentities($detalleProd->descripcion) ?></td>
+                                            <td class="text-nowrap">{{<?php echo htmlentities($detalleProd->costo_unitario) ?> |
                                                 dinero}}
                                             </td>
                                             <td>
-                                                {{<?php echo htmlentities($servicio->tiempoEnMinutos * $servicio->multiplicador) ?>
-                                                | minutosATiempo}}
+                                                {{<?php echo htmlentities($detalleProd->cantidad) ?>
+                                                }}
+                                            </td>
+                                            <td>
+                                                {{<?php echo htmlentities($detalleProd->costo_total) ?> |
+                                                dinero}}
                                             </td>
                                             <td>
                                                 <a
                                                         class="btn btn-warning"
-                                                        href="<?php printf('%s/?p=editar_servicio_de_cotizacion&idCotizacion=%s&idServicio=%s', BASE_URL, $cotizacion->id, $servicio->id) ?>">
+                                                        href="<?php printf('%s/?p=editar_producto_de_cotizacion&idCotizacion=%s&idDetProducto=%s', BASE_URL, $cotizacion->id, $detalleProd->id_producto) ?>">
                                                     <i class="fa fa-edit"></i>
                                                 </a>
                                             </td>
                                             <td>
                                                 <a
                                                         class="btn btn-danger"
-                                                        href="<?php printf('%s/?p=eliminar_servicio_de_cotizacion&idCotizacion=%s&tokenCSRF=%s&idServicio=%s', BASE_URL, $cotizacion->id, $tokenCSRF, $servicio->id) ?>">
+                                                        href="<?php printf('%s/?p=eliminar_producto_de_cotizacion&idCotizacion=%s&tokenCSRF=%s&idProducto=%s', BASE_URL, $cotizacion->id, $tokenCSRF, $detalleProd->id_producto) ?>">
                                                     <i class="fa fa-trash"></i>
                                                 </a>
                                             </td>
@@ -71,13 +86,34 @@ $tokenCSRF = Utiles::obtenerTokenCSRF();
                                     <?php } ?>
                                     </tbody>
                                     <tfoot>
-                                    <tr>
-                                        <td><strong>Total</strong></td>
-                                        <td class="text-nowrap"><strong>{{<?php echo htmlentities($costoTotal) ?> |
-                                                dinero}}</strong></td>
-                                        <td><strong>{{<?php echo $tiempoTotal ?> | minutosATiempo}}</strong></td>
-                                        <td colspan="2"></td>
-                                    </tr>
+                                        <?php
+                                            $valorIva = $baseImponibleIva * $porc / 100;
+                                            $totalCotizacion = $baseImponibleIva + $baseImponibleSinIva + $valorIva;
+                                        ?>
+                                        <tr>
+                                            <td><strong>Base Imponible Iva <?php echo $porc ?>%</strong></td>
+                                            <td class="text-nowrap"><strong>{{<?php echo htmlentities($baseImponibleIva) ?> |
+                                                    dinero}}</strong></td>
+                                            <td colspan="2"></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Base Imponible Iva 0%</strong></td>
+                                            <td class="text-nowrap"><strong>{{<?php echo htmlentities($baseImponibleSinIva) ?> |
+                                                    dinero}}</strong></td>
+                                            <td colspan="2"></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>IVA <?php echo $porc ?>%</strong></td>
+                                            <td class="text-nowrap"><strong>{{<?php echo htmlentities($valorIva) ?> |
+                                                    dinero}}</strong></td>
+                                            <td colspan="2"></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Total Cotización</strong></td>
+                                            <td class="text-nowrap"><strong>{{<?php echo htmlentities($totalCotizacion) ?> |
+                                                    dinero}}</strong></td>
+                                            <td colspan="2"></td>
+                                        </tr>
                                     </tfoot>
                                 </table>
                             </div>
@@ -85,35 +121,28 @@ $tokenCSRF = Utiles::obtenerTokenCSRF();
                     </div>
                 </div>
                 <div class="col-sm-4">
-                    <h3>Agregar nuevo servicio</h3>
-                    <form method="post" action="<?php echo BASE_URL ?>/?p=agregar_servicio_a_cotizacion">
+                    <h3>Agregar nuevo Producto</h3>
+                    <form method="post" action="<?php echo BASE_URL ?>/?p=agregar_producto_a_cotizacion">
                         <input type="hidden" name="idCotizacion" value="<?php echo $_GET["id"] ?>">
                         <input type="hidden" name="tokenCSRF" value="<?php echo $tokenCSRF ?>">
                         <div class="form-group">
-                            <label for="servicio">Servicio</label>
-                            <input autofocus name="servicio" autocomplete="off" required type="text"
-                                   class="form-control" id="servicio" placeholder="Por ejemplo: Desarrollo de app">
+                            <label for="idProducto">Producto</label>
+                            <select required class="form-control" name="idProducto" id="idProducto">
+                            <option value="-1"></option>
+                                <?php foreach ($productos as $producto) { ?>
+                                    <option value="<?php echo $producto->id ?>"><?php echo htmlentities($producto->descripcion) ?></option>
+                                <?php } ?>
+                            </select>
                         </div>
                         <div class="form-group">
-                            <label for="costo">Costo</label>
-                            <input name="costo" autocomplete="off" required type="number" class="form-control"
+                            <label for="costo">Precio Unitario</label>
+                            <input name="costo" autocomplete="off" required type="decimal" class="form-control"
                                    id="costo" placeholder="Costo">
                         </div>
                         <div class="form-group">
-                            <label for="tiempoEnMinutos">Tiempo</label>
-                            <input name="tiempoEnMinutos" autocomplete="off" required type="number" class="form-control"
-                                   id="tiempoEnMinutos" placeholder="Cantidad de tiempo que tomará el servicio">
-                        </div>
-                        <div class="form-group">
-                            <label for="multiplicador">Especificado en</label>
-                            <select required class="form-control" name="multiplicador" id="multiplicador">
-                                <option value="1">Minutos</option>
-                                <option value="60">Horas</option>
-                                <option value="1440">Días</option>
-                                <option value="10080">Semanas (7 días)</option>
-                                <option value="43200">Meses (30 días)</option>
-                                <option value="518400">Años (12 meses)</option>
-                            </select>
+                            <label for="cantidad">Cantidad</label>
+                            <input name="cantidad" autocomplete="off" required type="number" class="form-control"
+                                   id="cantidad" placeholder="Cantidad">
                         </div>
                         <button type="submit" class="btn btn-primary">Guardar</button>
                     </form>

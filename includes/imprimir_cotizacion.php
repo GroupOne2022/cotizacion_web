@@ -7,7 +7,8 @@ $cotizacion = Cotizaciones::porId($_GET["id"]);
 if (!$cotizacion) {
     exit("No existe la cotización");
 }
-$servicios = Cotizaciones::serviciosPorId($_GET["id"]);
+$porc = PORC_IVA;
+$detalleProductos = Cotizaciones::productosPorId($_GET["id"]);
 $caracteristicas = Cotizaciones::caracteristicasPorId($_GET["id"]);
 $ajustes = Ajustes::obtener();
 ?>
@@ -15,6 +16,7 @@ $ajustes = Ajustes::obtener();
     <div class="row">
         <div class="col-sm">
             <h1>Cotización para <?php echo htmlentities($cotizacion->descripcion) ?></h1>
+            <h3>Cotización número: <?php echo htmlentities($cotizacion->id) ?></h1>
             <h5>Identificación: <?php echo htmlentities($cotizacion->identificacion) ?></h5>
             <h5>Cliente: <?php echo htmlentities($cotizacion->razonSocial) ?></h5>
             <h5>Dirección Cliente: <?php echo htmlentities($cotizacion->direccion) ?></h5>
@@ -34,36 +36,63 @@ $ajustes = Ajustes::obtener();
                     <table class="table table-striped">
                         <thead>
                         <tr>
-                            <th>Servicio</th>
-                            <th>Costo estimado</th>
-                            <th>Tiempo estimado</th>
+                            <th>Producto</th>
+                            <th>Costo Unitario</th>
+                            <th>Cantidad</th>
+                            <th>Costo Total</th>
                         </tr>
                         </thead>
                         <tbody>
                         <?php
                         $costoTotal = 0;
-                        $tiempoTotal = 0;
-                        foreach ($servicios as $servicio) {
-                            $costoTotal += $servicio->costo;
-                            $tiempoTotal += $servicio->tiempoEnMinutos * $servicio->multiplicador;
+                        $baseImponibleIva = 0;
+                        $baseImponibleSinIva = 0;
+                        foreach ($detalleProductos as $detalleProd) {
+                            $costoTotal += $detalleProd->costo_total;
+                            if ($detalleProd->calculaIva=="SI") {
+                                $baseImponibleIva += $detalleProd->costo_total;
+                            }
+                            else {
+                                $baseImponibleSinIva += $detalleProd->costo_total;
+                            }
                             ?>
                             <tr>
-                                <td><?php echo htmlentities($servicio->servicio) ?></td>
-                                <td>{{<?php echo htmlentities($servicio->costo) ?> | dinero}}</td>
-                                <td>{{<?php echo htmlentities($servicio->tiempoEnMinutos * $servicio->multiplicador) ?>
-                                    |
-                                    minutosATiempo}}
-                                </td>
+                                <td><?php echo htmlentities($detalleProd->descripcion) ?></td>
+                                <td>{{<?php echo htmlentities($detalleProd->costo_unitario) ?> | dinero}}</td>
+                                <td>{{<?php echo htmlentities($detalleProd->cantidad) ?>}}</td>
+                                <td>{{<?php echo htmlentities($detalleProd->costo_total) ?> | dinero}}</td>
                             </tr>
                         <?php } ?>
                         </tbody>
                         <tfoot>
-                        <tr>
-                            <td><strong>Total</strong></td>
-                            <td class="text-nowrap"><strong>{{<?php echo $costoTotal ?> | dinero}}</strong></td>
-                            <td class="text-nowrap"><strong>{{<?php echo $tiempoTotal ?> | minutosATiempo}}</strong>
-                            </td>
-                        </tr>
+                            <?php
+                                $valorIva = $baseImponibleIva * $porc / 100;
+                                $totalCotizacion = $baseImponibleIva + $baseImponibleSinIva + $valorIva;
+                            ?>
+                            <tr>
+                                <td><strong>Base Imponible Iva <?php echo $porc ?>%</strong></td>
+                                <td class="text-nowrap"><strong>{{<?php echo htmlentities($baseImponibleIva) ?> |
+                                        dinero}}</strong></td>
+                                <td colspan="2"></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Base Imponible Iva 0%</strong></td>
+                                <td class="text-nowrap"><strong>{{<?php echo htmlentities($baseImponibleSinIva) ?> |
+                                        dinero}}</strong></td>
+                                <td colspan="2"></td>
+                            </tr>
+                            <tr>
+                                <td><strong>IVA <?php echo $porc ?>%</strong></td>
+                                <td class="text-nowrap"><strong>{{<?php echo htmlentities($valorIva) ?> |
+                                        dinero}}</strong></td>
+                                <td colspan="2"></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Total Cotización</strong></td>
+                                <td class="text-nowrap"><strong>{{<?php echo htmlentities($totalCotizacion) ?> |
+                                        dinero}}</strong></td>
+                                <td colspan="2"></td>
+                            </tr>
                         </tfoot>
                     </table>
                 </div>
@@ -88,7 +117,8 @@ $ajustes = Ajustes::obtener();
             <?php endif ?>
 
             <?php if (!empty($ajustes->remitente)): ?>
-                <p>Atentamente, <strong><?php echo htmlentities($ajustes->remitente) ?></strong></p>
+                <p>Atentamente,</p>
+                <p><strong><?php echo htmlentities($ajustes->remitente) ?></strong></p>
             <?php endif ?>
 
             <?php if (!empty($ajustes->mensajePie)): ?>

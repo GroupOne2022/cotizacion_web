@@ -22,7 +22,7 @@ $clientes = Clientes::todos();
             <div class="form-group">
                 <label for="descripcion">Descripción de la cotización</label>
                 <input autofocus name="descripcion" autocomplete="off" required type="text" class="form-control"
-                       id="descripcion" placeholder="Por ejemplo: Sistema de ventas, Construcción de casa">
+                       id="descripcion" placeholder="Por ejemplo: Facturas, flyers, calendarios, etc.">
             </div>
             <div class="form-group">
                 <label for="fecha">Fecha</label>

@@ -9,6 +9,18 @@ class Cotizaciones
         return $sentencia->execute([SesionService::obtenerIdUsuarioLogueado(), $idCliente, $descripcion, $fecha]);
     }
 
+    public static function eliminarProducto($idCotizacion, $idProducto)
+    {
+        $bd = BD::obtener();
+        $sentencia = $bd->prepare("delete cotizaciones_detalle
+        from cotizaciones_detalle
+       inner join cotizaciones on cotizaciones.id = cotizaciones_detalle.id_cotizacion 
+              and cotizaciones.idUsuario = ?
+              and cotizaciones_detalle.id_cotizacion = ?
+              and cotizaciones_detalle.id_producto = ?");
+        return $sentencia->execute([SesionService::obtenerIdUsuarioLogueado(), $idCotizacion, $idProducto]);
+    }
+
     public static function eliminarServicio($idServicio)
     {
         $bd = BD::obtener();
@@ -39,6 +51,20 @@ from servicios_cotizaciones
         return $sentencia->fetch(PDO::FETCH_OBJ);
     }
 
+    public static function obtenerProductoPorId($idCotizacion, $idProducto)
+    {
+        $bd = BD::obtener();
+        $sentencia = $bd->prepare("select cotizaciones_detalle.id, cotizaciones_detalle.id_cotizacion, cotizaciones_detalle.id_producto, productos.descripcion, costo_unitario, cantidad, costo_total, productos.calculaIva
+from cotizaciones_detalle
+       inner join cotizaciones on cotizaciones.id = cotizaciones_detalle.id_cotizacion
+       inner join productos on productos.id = cotizaciones_detalle.id_producto  
+       where cotizaciones.id = ?
+         and cotizaciones_detalle.id_producto = ?
+         and cotizaciones.idUsuario = ?;");
+        $sentencia->execute([$idCotizacion, $idProducto, SesionService::obtenerIdUsuarioLogueado()]);
+        return $sentencia->fetch(PDO::FETCH_OBJ);
+    }
+
     public static function obtenerCaracteristicaPorId($idCaracteristica)
     {
         $bd = BD::obtener();
@@ -56,6 +82,19 @@ from caracteristicas_cotizaciones
 from servicios_cotizaciones
        inner join cotizaciones on cotizaciones.id = servicios_cotizaciones.idCotizacion and cotizaciones.id = ?
                                     and cotizaciones.idUsuario = ?;");
+        $sentencia->execute([$idCotizacion, SesionService::obtenerIdUsuarioLogueado()]);
+        return $sentencia->fetchAll(PDO::FETCH_OBJ);
+    }
+
+    public static function productosPorId($idCotizacion)
+    {
+        $bd = BD::obtener();
+        $sentencia = $bd->prepare("select cotizaciones_detalle.id, cotizaciones_detalle.id_producto, productos.descripcion, costo_unitario, cantidad, costo_total, productos.calculaIva
+from cotizaciones_detalle
+       inner join cotizaciones on cotizaciones.id = cotizaciones_detalle.id_cotizacion
+       inner join productos on productos.id = cotizaciones_detalle.id_producto  
+       where cotizaciones.id = ?
+         and cotizaciones.idUsuario = ?;");
         $sentencia->execute([$idCotizacion, SesionService::obtenerIdUsuarioLogueado()]);
         return $sentencia->fetchAll(PDO::FETCH_OBJ);
     }
@@ -85,6 +124,22 @@ from caracteristicas_cotizaciones
         ]);
     }
 
+    public static function agregarProducto($idCotizacion, $idProducto, $costo, $cantidad)
+    {
+        $bd = BD::obtener();
+        $total = $costo*$cantidad;
+        $sentencia = $bd->prepare("insert into cotizaciones_detalle (id_cotizacion, id_producto, costo_unitario, cantidad, costo_total)
+        values ((select id from cotizaciones where cotizaciones.idUsuario = ? and cotizaciones.id = ?), ?, ?, ?, ?);");
+        return $sentencia->execute([
+            SesionService::obtenerIdUsuarioLogueado(),
+            $idCotizacion,
+            $idProducto,
+            $costo,
+            $cantidad,
+            $total
+        ]);
+    }
+
     public static function agregarCaracteristica($idCotizacion, $caracteristica)
     {
         $bd = BD::obtener();
@@ -106,6 +161,18 @@ from caracteristicas_cotizaciones
             multiplicador   = ?
         where servicios_cotizaciones.id = ?;");
         return $sentencia->execute([SesionService::obtenerIdUsuarioLogueado(), $servicio, $costo, $tiempoEnMinutos, $multiplicador, $idServicio]);
+    }
+
+    public static function actualizarProducto($idProducto, $idCotizacion, $costo, $cantidad)
+    {
+        $bd = BD::obtener();
+        $total = $costo*$cantidad;
+        $sentencia = $bd->prepare("update cotizaciones_detalle 
+        inner join cotizaciones on cotizaciones_detalle.id_cotizacion = cotizaciones.id and cotizaciones.idUsuario = ?
+        set costo_unitario  = ?, cantidad = ?, costo_total = ?
+        where id_cotizacion = ?
+          and id_producto = ?;");
+        return $sentencia->execute([SesionService::obtenerIdUsuarioLogueado(), $costo, $cantidad, $total, $idCotizacion, $idProducto]);
     }
 
     public static function actualizarCaracteristica($idCaracteristica, $caracteristica)

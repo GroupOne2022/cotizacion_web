@@ -6,7 +6,7 @@ $tokenCSRF = Utiles::obtenerTokenCSRF();
 <div class="row">
     <div class="col-sm">
         <h1>Cotizaciones</h1>
-        <p>Aquí aparecen las cotizaciones</p>
+        <p>Detalle de cotizaciones</p>
     </div>
 </div>
 

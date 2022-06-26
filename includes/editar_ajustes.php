@@ -37,13 +37,13 @@ $tokenCSRF = Utiles::obtenerTokenCSRF();
                 <?php include_once BASE_PATH . "/includes/publicidad.php" ?>
             </div>
             <div class="form-group">
-                <label for="mensajeAgradecimiento">Mensaje de agradecimiento</label>
-                <textarea placeholder="Mensaje que sale casi al final de la cotización" maxlength="255"
+                <label for="mensajeAgradecimiento">Mensaje después de la lista de productos</label>
+                <textarea placeholder="Mensaje que sale después del detalle de productos" maxlength="255"
                           name="mensajeAgradecimiento" id="mensajeAgradecimiento" cols="30" rows="3"
                           class="form-control"><?php echo htmlentities($ajustes->mensajeAgradecimiento) ?></textarea>
             </div>
             <div class="form-group">
-                <label for="mensajePie">Mensaje al final</label>
+                <label for="mensajePie">Mensaje de agradecimiento que se muestra al final</label>
                 <textarea placeholder="Mensaje que sale en el pie de página, después del remitente" maxlength="255"
                           name="mensajePie" id="mensajePie" cols="30" rows="3"
                           class="form-control"><?php echo htmlentities($ajustes->mensajePie) ?></textarea>

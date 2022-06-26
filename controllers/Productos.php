@@ -2,18 +2,18 @@
 
 class Productos
 {
-    public static function nuevo($descripcion, $valor, $image)
+    public static function nuevo($descripcion, $valor, $calculaIva)
     {
         $bd = BD::obtener();
-        $sentencia = $bd->prepare("insert into productos(descripcion, valor, image) VALUES (?, ?, ?);");
-        return $sentencia->execute([$descripcion, $valor, $image]);
+        $sentencia = $bd->prepare("insert into productos(descripcion, valor, calculaIva) VALUES (?, ?, ?);");
+        return $sentencia->execute([$descripcion, $valor, $calculaIva]);
     }
 
-    public static function actualizar($id, $descripcion, $valor, $image)
+    public static function actualizar($id, $descripcion, $valor, $calculaIva)
     {
         $bd = BD::obtener();
-        $sentencia = $bd->prepare("update productos set descripcion = ?, valor = ?, image = ? where id = ?;");
-        return $sentencia->execute([$descripcion, $valor, $image, $id]);
+        $sentencia = $bd->prepare("update productos set descripcion = ?, valor = ?, calculaIva = ? where id = ?;");
+        return $sentencia->execute([$descripcion, $valor, $calculaIva, $id]);
     }
 
     public static function todos()
@@ -27,7 +27,7 @@ class Productos
     public static function porId($id)
     {
         $bd = BD::obtener();
-        $sentencia = $bd->prepare("select id, descripcion, valor, image from productos where id = ?;");
+        $sentencia = $bd->prepare("select id, descripcion, valor, calculaIva from productos where id = ?;");
         $sentencia->execute([$id]);
         return $sentencia->fetch(PDO::FETCH_OBJ);
     }

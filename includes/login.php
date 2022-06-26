@@ -25,7 +25,7 @@ $tokenCSRF = Utiles::obtenerTokenCSRF();
             if (isset($_GET["mensaje"])) {
                 ?>
                 <br>
-                <div class="alert alert-warning">
+                <div class="alert alert-success">
                     <?php if ($_GET["mensaje"] == "1") { ?>
                         El usuario o la contraseña no coinciden
                     <?php } ?>
@@ -37,10 +37,8 @@ $tokenCSRF = Utiles::obtenerTokenCSRF();
                     <?php } ?>
                 </div>
             <?php } ?>
-            <div class="alert alert-danger">
-                <strong>¿Notas algo diferente?</strong>
-                <!--hemos cambiado de dominio, pero tu usuario y contraseña deberían seguir funcionando. En caso de que no,
-                contacta al programador-->
+            <div class="alert alert-warning">
+                <strong>Advertencia: </strong>No compartas tu usuario y contraseña con ninguna persona
             </div>
             <button type="submit" class="btn btn-primary">Entrar <i class="fa fa-arrow-right"></i></button>
             <br>

@@ -4,6 +4,7 @@ class Utiles
 {
     public static function redireccionar($lugar)
     {
+        
         header("Location: " . BASE_URL . "/?p=$lugar");
         exit;
     }

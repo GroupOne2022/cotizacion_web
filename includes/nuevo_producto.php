@@ -21,8 +21,12 @@ $tokenCSRF = Utiles::obtenerTokenCSRF();
                        id="valor" placeholder="Por ejemplo: 0.00">
             </div>
             <div class="form-group">
-                <label for="image">Imagen del Producto</label>
-                    <input autofocus type="file" name="image" autocomplete="off" class="form-control" id="image"/>
+                <label for="calculaIva">Calcula IVA</label>
+                <select required class="form-control" name="calculaIva" id="calculaIva">
+                    <option value=""></option>
+                    <option value="SI">SI</option>
+                    <option value="NO">NO</option>
+                </select>
             </div>
             <button type="submit" class="btn btn-primary">Guardar</button>
             <a class="btn btn-success" href="<?php echo BASE_URL ?>/?p=productos">&larr; Volver</a>
